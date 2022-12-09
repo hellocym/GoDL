@@ -19,20 +19,68 @@ func (a NDArray) Size() int {
 }
 
 // Sum compute the sum of NDArray elements.
-func Sum(a NDArray) float64 {
-	res := 0.0
-	for _, val := range a.Data {
-		res += val
+func Sum(a NDArray, axis int) NDArray {
+	if axis < 0 || axis >= len(a.Shape) {
+		panic("axis out of range")
 	}
+	dimAccum := a.Shape[axis]
+	resSize := a.Size() / dimAccum
+	resData := make([]float64, resSize)
+	resShape := make([]int, len(a.Shape))
+	copy(resShape, a.Shape)
+	resShape[axis] = 1
+
+	if axis == 0 {
+		for i := 0; i < resSize; i++ {
+			for j := 0; j < dimAccum; j++ {
+				resData[i] += a.Data[i+j*resSize]
+			}
+		}
+	} else {
+		for i := 0; i < resSize; i++ {
+			resIndices := index2indices(i, resShape)
+			for j := 0; j < dimAccum; j++ {
+				resIndices[axis] = j
+				resData[i] += a.Data[indices2index(resIndices, a.Shape)]
+			}
+		}
+	}
+	resShape = append(resShape[:axis], resShape[axis+1:]...)
+	res := NDArray{resShape, resData}
 	return res
 }
 
 // Prod compute the product of NDArray elements.
-func Prod(a NDArray) float64 {
-	res := 1.0
-	for _, val := range a.Data {
-		res *= val
+func Prod(a NDArray, axis int) NDArray {
+	if axis < 0 || axis >= len(a.Shape) {
+		panic("axis out of range")
 	}
+	dimAccum := a.Shape[axis]
+	resSize := a.Size() / dimAccum
+	resData := make([]float64, resSize)
+	resShape := make([]int, len(a.Shape))
+	copy(resShape, a.Shape)
+	resShape[axis] = 1
+
+	if axis == 0 {
+		for i := 0; i < resSize; i++ {
+			resData[i] = 1
+			for j := 0; j < dimAccum; j++ {
+				resData[i] *= a.Data[i+j*resSize]
+			}
+		}
+	} else {
+		for i := 0; i < resSize; i++ {
+			resIndices := index2indices(i, resShape)
+			resData[i] = 1
+			for j := 0; j < dimAccum; j++ {
+				resIndices[axis] = j
+				resData[i] *= a.Data[indices2index(resIndices, a.Shape)]
+			}
+		}
+	}
+	resShape = append(resShape[:axis], resShape[axis+1:]...)
+	res := NDArray{resShape, resData}
 	return res
 }
 
@@ -88,6 +136,31 @@ func (a NDArray) Iloc(indices ...int) float64 {
 		index += indices[i] * temp
 	}
 	return a.Data[index]
+}
+
+func indices2index(indices []int, shape []int) int {
+	index := 0
+	for i := 0; i < len(indices); i++ {
+		temp := 1
+		for j := i + 1; j < len(shape); j++ {
+			temp *= shape[j]
+		}
+		index += indices[i] * temp
+	}
+	return index
+}
+
+func index2indices(index int, shape []int) []int {
+	indices := make([]int, len(shape))
+	for i := 0; i < len(shape); i++ {
+		temp := 1
+		for j := i + 1; j < len(shape); j++ {
+			temp *= shape[j]
+		}
+		indices[i] = index / temp
+		index %= temp
+	}
+	return indices
 }
 
 // Repeat a NDArray along an axis
