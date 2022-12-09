@@ -6,8 +6,8 @@ A DL library written with go
 - [ ] Functions 
   - [x] Zeros
   - [x] Randn
-  - [ ] Sum
-  - [ ] Prod
+  - [x] Sum
+  - [x] Prod
   - [ ] Select: Get slice along given axis with given indices
   - [ ] ...
 - [ ] Methods
