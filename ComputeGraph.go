@@ -13,8 +13,11 @@ import (
 
 func main() {
 	//D, N := 8, 7
-	x := numgo.Randn(2, 3)
-	fmt.Println(x) //print(x)
-
-	//Y := numgo.repeat(x, N, axis=0)
+	//x := numgo.Randn(1, D)
+	//fmt.Println(x) //print(x)
+	//y := numgo.Repeat(x, N, axis=0)
+	x := numgo.Randn(2, 3, 4)
+	//fmt.Println(x)
+	y := numgo.Repeat(x, 2, 2)
+	fmt.Println(y)
 }
